@@ -1,5 +1,5 @@
 FROM debian:bullseye-slim
-MAINTAINER Odoo S.A. <info@odoo.com>
+MAINTAINER  Fengbo Wu <fengbo_wu@163.com>
 
 SHELL ["/bin/bash", "-xo", "pipefail", "-c"]
 
@@ -62,6 +62,14 @@ RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/od
     && apt-get update \
     && apt-get -y install --no-install-recommends ./odoo.deb \
     && rm -rf /var/lib/apt/lists/* odoo.deb
+
+#COPY ./odoo-server /odoo-server
+#RUN ls &&  cd ./odoo-server \
+#    && python3 setup.py build \
+#    && python3 setup.py install
+#
+#RUN which odoo
+
 
 # Copy entrypoint script and Odoo configuration file
 COPY ./entrypoint.sh /
