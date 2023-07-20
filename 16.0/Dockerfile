@@ -1,14 +1,24 @@
-FROM debian:bullseye-slim
-MAINTAINER Odoo S.A. <info@odoo.com>
+FROM debian:bullseye
+MAINTAINER  Fengbo Wu <fengbo_wu@163.com>
 
 SHELL ["/bin/bash", "-xo", "pipefail", "-c"]
 
 # Generate locale C.UTF-8 for postgres and general locale data
 ENV LANG C.UTF-8
 
+RUN echo "deb http://mirrors.tencent.com/debian/ bullseye main non-free contrib"                 > /etc/apt/sources.list
+RUN echo "deb-src http://mirrors.tencent.com/debian/ bullseye main non-free contrib"             >> /etc/apt/sources.list
+RUN echo "deb http://mirrors.tencent.com/debian-security/ bullseye-security main"                >> /etc/apt/sources.list
+RUN echo "deb-src http://mirrors.tencent.com/debian-security/ bullseye-security main"            >> /etc/apt/sources.list
+RUN echo "deb http://mirrors.tencent.com/debian/ bullseye-updates main non-free contrib"         >> /etc/apt/sources.list
+RUN echo "deb-src http://mirrors.tencent.com/debian/ bullseye-updates main non-free contrib"     >> /etc/apt/sources.list
+RUN echo "deb http://mirrors.tencent.com/debian/ bullseye-backports main non-free contrib"       >> /etc/apt/sources.list
+RUN echo "deb-src http://mirrors.tencent.com/debian/ bullseye-backports main non-free contrib"   >> /etc/apt/sources.list
+
+COPY ./wkhtmltox.deb .
 # Install some deps, lessc and less-plugin-clean-css, and wkhtmltopdf
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+    apt-get install -y --no-install-recommends --fix-missing\
         ca-certificates \
         curl \
         dirmngr \
@@ -31,8 +41,6 @@ RUN apt-get update && \
         python3-xlrd \
         python3-xlwt \
         xz-utils \
-    && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.buster_amd64.deb \
-    && echo 'ea8277df4297afc507c61122f3c349af142f31e5 wkhtmltox.deb' | sha1sum -c - \
     && apt-get install -y --no-install-recommends ./wkhtmltox.deb \
     && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
@@ -56,10 +64,10 @@ RUN npm install -g rtlcss
 # Install Odoo
 ENV ODOO_VERSION 16.0
 ARG ODOO_RELEASE=20230430
-ARG ODOO_SHA=1d8d64fec19fc1c31e13d9d9cdc4b127ba4e72cd
-RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
-    && echo "${ODOO_SHA} odoo.deb" | sha1sum -c - \
-    && apt-get update \
+ARG ODOO_SHA=af1128e5d8126e079a968ec22696a122965a4404
+COPY ./odoo.deb .
+
+RUN apt-get update \
     && apt-get -y install --no-install-recommends ./odoo.deb \
     && rm -rf /var/lib/apt/lists/* odoo.deb
 
